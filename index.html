@@ -745,6 +745,48 @@
                 grid-template-columns: 1fr;
                 max-width: 90vw;
             }
+
+            /* Extra small devices (phones <480px) */
+        @media (max-width: 480px) {
+            .glow-title, .page-title, .cake-title {
+                font-size: 1.8rem;
+            }
+        
+            .subtitle, .countdown-title {
+                font-size: 1.2rem;
+            }
+        
+            .typewriter, .quiz-question, .fact-text {
+                font-size: 1rem;
+            }
+        
+            .start-btn, .nav-btn, .menu-item {
+                width: 100%;
+                padding: 14px;
+                font-size: 1rem;
+            }
+        
+            .memory-game {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 250px;
+            }
+        
+            .fact-container, .quiz-container, .message-container {
+                padding: 1.2rem;
+                margin: 0.5rem;
+            }
+        
+            .countdown-display {
+                font-size: 1.5rem;
+                padding: 1rem;
+            }
+        
+            .cat-photo-placeholder {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 4/3;
+            }
+        }
         }
     </style>
 </head>
