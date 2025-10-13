@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy 4 Months! - Our Online Adventure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, onSnapshot, disableNetwork } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        setLogLevel('silent');
+        
+        window.Firebase = {
+            initializeApp, getAuth, signInAnonymously, signInWithCustomToken, 
+            getFirestore, doc, setDoc, updateDoc, onSnapshot, disableNetwork
+        };
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .fade-in-up {
+            animation: fadeInUp 1.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: transparent;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            transform: translate3d(0, 0, 0);
+        }
+        .interaction-pulse {
+            animation: pulse-grow 0.5s ease-out;
+        }
+        @keyframes pulse-grow {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .blended-button {
+            transition: all 0.15s;
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        .blended-button:hover {
+            background-color: rgba(245, 245, 255, 0.9);
+        }
+        .text-shadow-glow {
+            transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
+            color: #4a5568;
+        }
+        .text-shadow-glow:hover {
+            text-shadow: 0 0 8px rgba(255, 105, 180, 0.6);
+            color: #e879f9;
+        }
+        .burst-emoji {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            animation: burst 1s ease-out forwards;
+            z-index: 2000;
+        }
+        @keyframes burst {
+            0% { transform: scale(0.5) translateY(0); opacity: 1; }
+            50% { transform: scale(1.5) translateY(-50px); opacity: 1; }
+            100% { transform: scale(2) translateY(-100px); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="w-full max-w-lg mx-4 p-8 bg-white shadow-2xl rounded-3xl transition-all duration-700">
+        <div id="locked-screen" class="flex flex-col items-center justify-center text-center">
+            <svg class="w-16 h-16 text-pink-500 mb-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-4a2 2 0 00-2-2H6a2 2 0 00-2 2v4a2 2 0 002 2zm0-6h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v4a2 2 0 002 2z"></path>
+            </svg>
+            <h1 class="text-3xl font-extrabold text-gray-800 mb-6">Enter Your Secret Code</h1>
+            <p class="text-gray-600 mb-8">This special message is just for you.</p>
+            <input type="password" id="unlock-code-input" placeholder="********" maxlength="8" class="w-full p-3 mb-4 text-center text-2xl tracking-widest border-2 border-pink-300 rounded-xl focus:border-pink-500 focus:ring-pink-500 transition duration-300 outline-none">
+            <button id="unlock-button" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-300 transform hover:scale-[1.02] active:scale-[0.98]">Unlock Message</button>
+            <p id="error-message" class="text-red-500 mt-4 opacity-0 transition-opacity duration-300">Incorrect code. Try again, sweetheart!</p>
+        </div>
+
+        <div id="unlocked-screen" class="hidden flex flex-col items-center justify-center text-center">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-pink-600 mb-6 fade-in-up" style="animation-delay: 0.1s;">Happy 4 Months!</h2>
+            <p class="text-xl md:text-2xl text-purple-700 mb-8 fade-in-up" style="animation-delay: 0.5s;">To my amazing partner,</p>
+            <div id="main-message" class="space-y-6 text-gray-700 text-lg md:text-xl leading-relaxed max-w-sm fade-in-up text-shadow-glow hover:text-pink-500" style="animation-delay: 1s;">
+                <p>Four months of late-night calls, endless pings, and connecting across all the miles. Every time I see your name pop up, the distance shrinks to nothing.</p>
+                <p>You're the best notification I get all day. Thank you for making this long-distance journey the best adventure, <span class="font-bold">even if it's only online for now.</span></p>
+                <p class="text-2xl font-semibold text-pink-500">I love you more than words can type.</p>
+            </div>
+
+            <div id="interaction-buttons" class="flex flex-wrap justify-center gap-4 mt-10 fade-in-up" style="animation-delay: 1.8s;">
+                <button data-type="hugs" data-emoji="🫂" class="blended-button p-4 rounded-xl transition duration-150 transform active:scale-95 flex flex-col items-center justify-center min-w-[120px] hover:bg-purple-50">
+                    <span class="text-3xl text-pink-500">🫂</span>
+                    <span class="text-sm font-semibold mt-1 text-gray-600">Send Hug</span>
+                    <span id="hug-count" class="text-xs font-bold mt-1 text-purple-500">0</span>
+                </button>
+                <button data-type="hearts" data-emoji="💖" class="blended-button p-4 rounded-xl transition duration-150 transform active:scale-95 flex flex-col items-center justify-center min-w-[120px] hover:bg-red-50">
+                    <span class="text-3xl text-pink-500">❤️</span>
+                    <span class="text-sm font-semibold mt-1 text-gray-600">Send Heart</span>
+                    <span id="heart-count" class="text-xs font-bold mt-1 text-red-500">0</span>
+                </button>
+                <button data-type="kisses" data-emoji="😘" class="blended-button p-4 rounded-xl transition duration-150 transform active:scale-95 flex flex-col items-center justify-center min-w-[120px] hover:bg-pink-50">
+                    <span class="text-3xl text-pink-500">💋</span>
+                    <span class="text-sm font-semibold mt-1 text-gray-600">Send Kiss</span>
+                    <span id="kiss-count" class="text-xs font-bold mt-1 text-pink-500">0</span>
+                </button>
+            </div>
+
+            <button id="reset-counters-button" class="mt-6 text-sm text-gray-500 hover:text-red-500 transition duration-150 underline fade-in-up" style="animation-delay: 2.0s;">Reset Counters (for fun!)</button>
+            <p class="text-purple-500 mt-8 text-lg fade-in-up" style="animation-delay: 2.2s;">Forever yours,<br>Venlin</p>
+            <button id="next-page-button" onclick="window.location.href = 'page2.html';" class="mt-6 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center fade-in-up" style="animation-delay: 2.4s;">Continue the Surprise →</button>
+        </div>
+    </div>
+
+    <script type="module">
+        const { initializeApp, getAuth, signInWithCustomToken, signInAnonymously, getFirestore, doc, setDoc, updateDoc, onSnapshot, disableNetwork } = window.Firebase;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const CORRECT_CODE = "19091307";
+            const lockedScreen = document.getElementById('locked-screen');
+            const unlockedScreen = document.getElementById('unlocked-screen');
+            const codeInput = document.getElementById('unlock-code-input');
+            const unlockButton = document.getElementById('unlock-button');
+            const errorMessage = document.getElementById('error-message');
+            const resetButton = document.getElementById('reset-counters-button');
+            const hugCountSpan = document.getElementById('hug-count');
+            const heartCountSpan = document.getElementById('heart-count');
+            const kissCountSpan = document.getElementById('kiss-count');
+            const COLORS = ['#FFC0CB', '#FF69B4', '#DA70D6', '#9370DB', '#DDA0DD'];
+            
+            let db, countersRef, useLocalStorage = false;
+            const initialCounters = { hugs: 0, hearts: 0, kisses: 0 };
+            let localCounters = {...initialCounters};
+
+            const initFirebase = async () => {
+                useLocalStorage = true;
+                loadLocalCounters();
+                try {
+                    const app = initializeApp({
+                        apiKey: "AIzaSyBxSEzcFY3upg-ABn_S_YdYFP7zTvNterM",
+                        authDomain: "venlin-826c5.firebaseapp.com",
+                        projectId: "venlin-826c5",
+                        storageBucket: "venlin-826c5.firebasestorage.app",
+                        messagingSenderId: "867276134485",
+                        appId: "1:867276134485:web:560797e0fd58506293dcdc"
+                    });
+                    const auth = getAuth(app);
+                    db = getFirestore(app);
+                    const authPromise = (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) ? signInWithCustomToken(auth, __initial_auth_token) : signInAnonymously(auth);
+                    await Promise.race([authPromise, new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))]);
+                    countersRef = doc(db, 'artifacts', 'venlin-826c5', 'public', 'data', 'anniversary_counters', 'main');
+                    setupRealtimeCounterListener();
+                    useLocalStorage = false;
+                    console.log("✓ Firebase connected");
+                } catch (e) {
+                    if (db) try { await disableNetwork(db); } catch (ex) {}
+                    console.log("✓ Running in local mode");
+                }
+            };
+
+            const loadLocalCounters = () => {
+                hugCountSpan.textContent = localCounters.hugs;
+                heartCountSpan.textContent = localCounters.hearts;
+                kissCountSpan.textContent = localCounters.kisses;
+            };
+
+            const setupRealtimeCounterListener = () => {
+                onSnapshot(countersRef, (docSnapshot) => {
+                    if (docSnapshot.exists()) {
+                        const data = docSnapshot.data();
+                        hugCountSpan.textContent = data.hugs || 0;
+                        heartCountSpan.textContent = data.hearts || 0;
+                        kissCountSpan.textContent = data.kisses || 0;
+                        localCounters = { ...data };
+                    } else {
+                        setDoc(countersRef, initialCounters).catch(() => { useLocalStorage = true; });
+                    }
+                }, () => {
+                    useLocalStorage = true;
+                    loadLocalCounters();
+                    if (db) disableNetwork(db).catch(() => {});
+                });
+            };
+
+            const updateCounter = async (type) => {
+                if (useLocalStorage) {
+                    localCounters[type]++;
+                    if (type === 'hugs') hugCountSpan.textContent = localCounters.hugs;
+                    else if (type === 'hearts') heartCountSpan.textContent = localCounters.hearts;
+                    else kissCountSpan.textContent = localCounters.kisses;
+                    return;
+                }
+                if (!db || !countersRef) return;
+                const counterUpdate = {};
+                let currentValue = parseInt((type === 'hugs' ? hugCountSpan : type === 'hearts' ? heartCountSpan : kissCountSpan).textContent) || 0;
+                counterUpdate[type] = currentValue + 1;
+                try {
+                    await updateDoc(countersRef, counterUpdate);
+                } catch (e) {
+                    await setDoc(countersRef, initialCounters);
+                    await updateDoc(countersRef, counterUpdate);
+                }
+            };
+
+            const resetCounters = async () => {
+                if (useLocalStorage) {
+                    localCounters = {...initialCounters};
+                    loadLocalCounters();
+                    return;
+                }
+                if (!db || !countersRef) return;
+                try { await setDoc(countersRef, initialCounters); } catch (e) {}
+            };
+
+            let synths = {};
+            const initAudio = async () => {
+                try {
+                    if (Tone.context.state !== 'running') await Tone.start();
+                    synths.hug = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sine" }, envelope: { attack: 0.2, decay: 0.3, sustain: 0.5, release: 1.5 }, volume: -12 }).toDestination();
+                    synths.heart = new Tone.PluckSynth({ dampening: 8000, resonance: 0.8, volume: -10 }).toDestination();
+                    synths.kiss = new Tone.Synth({ oscillator: { type: "triangle" }, envelope: { attack: 0.05, decay: 0.15, sustain: 0, release: 0.3 }, volume: -18 }).toDestination();
+                } catch (e) {}
+            };
+
+            const playInteractionSound = async (type) => {
+                if (!synths.hug) await initAudio();
+                if (type === 'hugs' && synths.hug) synths.hug.triggerAttackRelease(["C4", "E4", "G4"], "1s");
+                else if (type === 'hearts' && synths.heart) synths.heart.triggerAttackRelease("A4", "0.5s");
+                else if (type === 'kisses' && synths.kiss) synths.kiss.triggerAttackRelease("G5", "0.1s");
+            };
+
+            const showEmojiBurst = (button, emoji) => {
+                const rect = button.getBoundingClientRect();
+                const el = document.createElement('span');
+                el.classList.add('burst-emoji');
+                el.textContent = emoji;
+                el.style.left = `${rect.left + Math.random() * (rect.width - 32)}px`;
+                el.style.top = `${rect.top + Math.random() * (rect.height - 32)}px`;
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1000);
+            };
+
+            const confetti = () => {
+                for (let i = 0; i < 100; i++) {
+                    const c = document.createElement('div');
+                    c.classList.add('confetti');
+                    const x = Math.random() * window.innerWidth;
+                    c.style.left = `${x}px`;
+                    c.style.top = '-10px';
+                    c.style.backgroundColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+                    c.style.width = c.style.height = `${Math.random() * 8 + 5}px`;
+                    document.body.appendChild(c);
+                    const duration = Math.random() * 2.5 + 1.5;
+                    const finalX = x + (Math.random() - 0.5) * 500;
+                    c.animate([
+                        { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
+                        { transform: `translate(${finalX - x}px, ${window.innerHeight + 10}px) rotate(${Math.random() * 360}deg)`, opacity: 0.5 }
+                    ], { duration: duration * 1000, easing: 'ease-in', fill: 'forwards' });
+                    setTimeout(() => c.remove(), duration * 1000);
+                }
+            };
+
+            const handleUnlock = () => {
+                if (codeInput.value === CORRECT_CODE) {
+                    lockedScreen.classList.add('hidden');
+                    unlockedScreen.classList.remove('hidden');
+                    confetti();
+                    const interval = setInterval(confetti, 500);
+                    setTimeout(() => clearInterval(interval), 3000);
+                } else {
+                    errorMessage.classList.remove('opacity-0');
+                    codeInput.value = '';
+                    setTimeout(() => errorMessage.classList.add('opacity-0'), 2000);
+                }
+            };
+
+            unlockButton.addEventListener('click', handleUnlock);
+            codeInput.addEventListener('keypress', (e) => {
+                if (e.key < '0' || e.key > '9') e.preventDefault();
+                if (e.key === 'Enter') handleUnlock();
+            });
+            if (resetButton) resetButton.addEventListener('click', resetCounters);
+            document.querySelectorAll('#interaction-buttons button').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const type = button.dataset.type;
+                    await playInteractionSound(type);
+                    updateCounter(type);
+                    showEmojiBurst(button, button.dataset.emoji);
+                    button.classList.add('interaction-pulse');
+                    setTimeout(() => button.classList.remove('interaction-pulse'), 500);
+                });
+            });
+
+            codeInput.focus();
+            initFirebase();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page 2 - Our Relationship Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            overflow-y: auto;
+            padding: 0;
+            margin: 0;
+        }
+        .fade-in-up {
+            animation: fadeInUp 1s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #f687b3;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="w-full max-w-7xl mx-auto px-6 py-12 bg-white transition-all duration-700">
+        <h2 class="text-4xl md:text-5xl font-extrabold text-pink-600 mb-4 text-center fade-in-up" style="animation-delay: 0.2s;">
+            Chapter Two: The Dashboard
+        </h2>
+        
+        <p class="text-xl md:text-2xl text-purple-700 mb-8 text-center fade-in-up" style="animation-delay: 0.4s;">
+            An analysis of our first 4 months!
+        </p>
+
+        <div id="file-upload-container" class="text-center fade-in-up mb-8" style="animation-delay: 0.6s;">
+            <div class="p-6">
+                <p class="text-gray-700 mb-4">Upload your Instagram message JSON files to analyze your conversations</p>
+                <input type="file" id="file-input" multiple accept=".json" class="hidden">
+                <label for="file-input" class="cursor-pointer bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 active:scale-95 inline-block">
+                    📁 Select JSON Files
+                </label>
+                <p id="files-selected" class="text-sm text-gray-500 mt-3 hidden">Files selected: <span id="file-count">0</span></p>
+            </div>
+        </div>
+
+        <div id="loading-container" class="text-center fade-in-up hidden" style="animation-delay: 0.8s;">
+            <button id="analyze-button" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center mx-auto">
+                ✨ Analyze Our Messages
+            </button>
+            <div id="loading-spinner" class="hidden flex flex-col items-center justify-center mt-6">
+                <div class="spinner"></div>
+                <p class="mt-3 text-gray-600">Analyzing thousands of words... this may take a moment!</p>
+            </div>
+            <p id="error-message" class="text-red-500 mt-4 hidden"></p>
+        </div>
+        
+        <div id="dashboard-results" class="hidden space-y-12 pt-8">
+            <!-- Overview Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 fade-in-up" style="animation-delay: 1.0s;">
+                <div class="bg-gradient-to-br from-pink-500 to-rose-500 p-6 rounded-2xl shadow-lg text-white">
+                    <div class="text-4xl font-bold" id="total-messages">0</div>
+                    <div class="text-sm opacity-90 mt-1">Total Messages</div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-500 to-indigo-500 p-6 rounded-2xl shadow-lg text-white">
+                    <div class="text-4xl font-bold" id="days-together">0</div>
+                    <div class="text-sm opacity-90 mt-1">Days Together</div>
+                </div>
+                <div class="bg-gradient-to-br from-blue-500 to-cyan-500 p-6 rounded-2xl shadow-lg text-white">
+                    <div class="text-4xl font-bold" id="avg-daily">0</div>
+                    <div class="text-sm opacity-90 mt-1">Avg Daily Messages</div>
+                </div>
+                <div class="bg-gradient-to-br from-amber-500 to-orange-500 p-6 rounded-2xl shadow-lg text-white">
+                    <div class="text-4xl font-bold" id="total-words">0</div>
+                    <div class="text-sm opacity-90 mt-1">Total Words</div>
+                </div>
+            </div>
+
+            <!-- Engagement & Interest Level -->
+            <div class="fade-in-up" style="animation-delay: 1.1s;">
+                <h3 class="text-3xl font-bold text-gray-800 text-center mb-6">💞 Engagement & Interest Level</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-8 rounded-2xl shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-xl font-bold text-pink-600" id="user1-engagement-name">User 1</h4>
+                            <div class="text-3xl">💖</div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-700 font-medium">Interest Level</span>
+                                <span class="font-bold text-pink-600" id="user1-interest">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div id="user1-interest-bar" class="bg-gradient-to-r from-pink-400 to-pink-600 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-700 font-medium">Response Rate</span>
+                                <span class="font-bold text-pink-600" id="user1-response">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div id="user1-response-bar" class="bg-gradient-to-r from-purple-400 to-purple-600 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-xl font-bold text-purple-600" id="user2-engagement-name">User 2</h4>
+                            <div class="text-3xl">💜</div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-700 font-medium">Interest Level</span>
+                                <span class="font-bold text-purple-600" id="user2-interest">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div id="user2-interest-bar" class="bg-gradient-to-r from-purple-400 to-purple-600 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-700 font-medium">Response Rate</span>
+                                <span class="font-bold text-purple-600" id="user2-response">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div id="user2-response-bar" class="bg-gradient-to-r from-pink-400 to-pink-600 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Individual User Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 fade-in-up" style="animation-delay: 1.2s;">
+                <!-- User 1 Card -->
+                <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-3xl font-bold text-pink-600" id="user1-name">User 1</h3>
+                        <div class="text-5xl">💕</div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 font-medium">Messages Sent</span>
+                            <span class="text-2xl font-bold text-pink-600" id="user1-messages">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 font-medium">Words Written</span>
+                            <span class="text-2xl font-bold text-pink-600" id="user1-words">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 font-medium">Avg Message Length</span>
+                            <span class="text-2xl font-bold text-pink-600" id="user1-avg">0</span>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-gray-100">
+                            <p class="text-sm text-gray-600 mb-2 font-semibold">Communication Style:</p>
+                            <p class="text-gray-700 italic" id="user1-style">Analyzing...</p>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-600 mb-2 font-semibold">Favorite Topics:</p>
+                            <div id="user1-topics" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User 2 Card -->
+                <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-3xl font-bold text-purple-600" id="user2-name">User 2</h3>
+                        <div class="text-5xl">💜</div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 font-medium">Messages Sent</span>
+                            <span class="text-2xl font-bold text-purple-600" id="user2-messages">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 font-medium">Words Written</span>
+                            <span class="text-2xl font-bold text-purple-600" id="user2-words">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-700 font-medium">Avg Message Length</span>
+                            <span class="text-2xl font-bold text-purple-600" id="user2-avg">0</span>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-gray-100">
+                            <p class="text-sm text-gray-600 mb-2 font-semibold">Communication Style:</p>
+                            <p class="text-gray-700 italic" id="user2-style">Analyzing...</p>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-600 mb-2 font-semibold">Favorite Topics:</p>
+                            <div id="user2-topics" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Green & Red Flags -->
+            <div class="fade-in-up" style="animation-delay: 1.3s;">
+                <h3 class="text-3xl font-bold text-gray-800 text-center mb-6">🚦 Relationship Health Check</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Green Flags -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg">
+                        <div class="flex items-center mb-6">
+                            <div class="text-4xl mr-3">✅</div>
+                            <h4 class="text-2xl font-bold text-green-600">Green Flags</h4>
+                        </div>
+                        <ul id="green-flags-list" class="space-y-3"></ul>
+                    </div>
+                    <!-- Red Flags -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg">
+                        <div class="flex items-center mb-6">
+                            <div class="text-4xl mr-3">⚠️</div>
+                            <h4 class="text-2xl font-bold text-red-600">Areas to Watch</h4>
+                        </div>
+                        <ul id="red-flags-list" class="space-y-3"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Communication Focus Chart -->
+            <div class="fade-in-up" style="animation-delay: 1.4s;">
+                <h3 class="text-3xl font-bold text-gray-800 text-center mb-6">Our Communication Focus</h3>
+                <div class="p-8 bg-white rounded-2xl shadow-lg border border-gray-100">
+                    <canvas id="topic-pie-chart" style="max-height: 400px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Activity Timeline -->
+            <div class="fade-in-up" style="animation-delay: 1.6s;">
+                <h3 class="text-3xl font-bold text-gray-800 text-center mb-6">Conversation Timeline</h3>
+                <div class="p-8 bg-white rounded-2xl shadow-lg border border-gray-100">
+                    <canvas id="timeline-chart" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Relationship Insights -->
+            <div class="fade-in-up" style="animation-delay: 1.8s;">
+                <h3 class="text-3xl font-bold text-gray-800 text-center mb-6">💝 Relationship Insights</h3>
+                <div id="insights-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </div>
+
+            <!-- Growth Suggestions -->
+            <div class="fade-in-up" style="animation-delay: 2.0s;">
+                <h3 class="text-3xl font-bold text-gray-800 text-center mb-6">🌱 LDR Growth & Goals</h3>
+                <ul id="suggestions-list" class="space-y-4"></ul>
+            </div>
+        </div>
+
+        <div class="mt-12 text-center fade-in-up" style="animation-delay: 2.0s;">
+            <button onclick="window.location.href = 'index.html';" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-xl shadow-md transition duration-300 transform hover:scale-105 active:scale-95">
+                ← Back to Message
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let chatFiles = [];
+        let myChart = null;
+        let timelineChart = null;
+
+        const fileInput = document.getElementById('file-input');
+        const filesSelected = document.getElementById('files-selected');
+        const fileCount = document.getElementById('file-count');
+        const analyzeButton = document.getElementById('analyze-button');
+        const loadingContainer = document.getElementById('loading-container');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const dashboardResults = document.getElementById('dashboard-results');
+        const errorMessage = document.getElementById('error-message');
+        const suggestionsList = document.getElementById('suggestions-list');
+
+        fileInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            chatFiles = [];
+            for (const file of files) {
+                try {
+                    const text = await file.text();
+                    const json = JSON.parse(text);
+                    chatFiles.push(json);
+                } catch (err) {
+                    console.error(`Error reading ${file.name}:`, err);
+                }
+            }
+
+            if (chatFiles.length > 0) {
+                filesSelected.classList.remove('hidden');
+                fileCount.textContent = chatFiles.length;
+                loadingContainer.classList.remove('hidden');
+            }
+        });
+
+        const fixEncoding = (text) => {
+            if (!text) return text;
+            try {
+                const bytes = new Uint8Array(text.split('').map(char => char.charCodeAt(0)));
+                return new TextDecoder('utf-8').decode(bytes);
+            } catch (e) {
+                return text;
+            }
+        };
+
+        const calculateStats = () => {
+            const stats = {
+                totalMessages: 0,
+                totalWords: 0,
+                users: {},
+                dates: [],
+                messages: []
+            };
+
+            for (const file of chatFiles) {
+                if (file.messages) {
+                    for (const message of file.messages) {
+                        if (message.content) {
+                            stats.totalMessages++;
+                            const words = message.content.split(/\s+/).length;
+                            stats.totalWords += words;
+                            
+                            let sender = message.sender_name || 'Unknown';
+                            sender = fixEncoding(sender);
+                            
+                            if (!stats.users[sender]) {
+                                stats.users[sender] = { messages: 0, words: 0, messageTexts: [] };
+                            }
+                            stats.users[sender].messages++;
+                            stats.users[sender].words += words;
+                            stats.users[sender].messageTexts.push(message.content);
+                            
+                            if (message.timestamp_ms) {
+                                stats.dates.push(new Date(message.timestamp_ms));
+                            }
+                            
+                            stats.messages.push({ sender, content: message.content, timestamp: message.timestamp_ms });
+                        }
+                    }
+                }
+            }
+
+            return stats;
+        };
+
+        const formatChatData = () => {
+            let combinedMessages = "";
+            let messageCount = 0;
+            const MAX_MESSAGES = 2000;
+
+            for (const file of chatFiles) {
+                if (file.messages) {
+                    for (const message of file.messages) {
+                        if (message.content && messageCount < MAX_MESSAGES) {
+                            let senderName = message.sender_name || 'Unknown';
+                            senderName = fixEncoding(senderName);
+                            combinedMessages += `${senderName}: ${message.content}\n`;
+                            messageCount++;
+                        }
+                    }
+                }
+            }
+            return combinedMessages;
+        };
+
+        const apiKey = "AIzaSyCZZHz8Mh2cY-Uktwp3W2KsyxY0f34wc0g";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
+
+        const responseSchema = {
+            type: "OBJECT",
+            properties: {
+                topics: {
+                    type: "ARRAY",
+                    items: {
+                        type: "OBJECT",
+                        properties: {
+                            name: { type: "STRING" },
+                            percentage: { type: "INTEGER" }
+                        },
+                        required: ["name", "percentage"]
+                    }
+                },
+                suggestions: {
+                    type: "ARRAY",
+                    items: { type: "STRING" }
+                },
+                user1Style: { type: "STRING" },
+                user2Style: { type: "STRING" },
+                user1Topics: {
+                    type: "ARRAY",
+                    items: { type: "STRING" }
+                },
+                user2Topics: {
+                    type: "ARRAY",
+                    items: { type: "STRING" }
+                },
+                insights: {
+                    type: "ARRAY",
+                    items: {
+                        type: "OBJECT",
+                        properties: {
+                            title: { type: "STRING" },
+                            description: { type: "STRING" },
+                            icon: { type: "STRING" }
+                        },
+                        required: ["title", "description", "icon"]
+                    }
+                },
+                greenFlags: {
+                    type: "ARRAY",
+                    items: { type: "STRING" }
+                },
+                redFlags: {
+                    type: "ARRAY",
+                    items: { type: "STRING" }
+                },
+                user1Interest: { type: "INTEGER" },
+                user2Interest: { type: "INTEGER" }
+            },
+            required: ["topics", "suggestions", "user1Style", "user2Style", "user1Topics", "user2Topics", "insights", "greenFlags", "redFlags", "user1Interest", "user2Interest"]
+        };
+
+        const callGeminiApi = async (chatData, stats) => {
+            const userNames = Object.keys(stats.users);
+            const systemPrompt = `You are a romantic relationship analyst. Analyze the chat logs and provide:
+1. Topics: Identify 6-8 key conversation topics (e.g., Affection, Humor, Gaming, Future Plans, Daily Life, Support). Percentages must sum to exactly 100.
+2. Suggestions: Provide 4 sweet, constructive LDR growth suggestions.
+3. user1Style: Describe ${userNames[0]}'s communication style in 15-20 words.
+4. user2Style: Describe ${userNames[1]}'s communication style in 15-20 words.
+5. user1Topics: List 3 favorite topics for ${userNames[0]} (short phrases).
+6. user2Topics: List 3 favorite topics for ${userNames[1]} (short phrases).
+7. insights: Provide 4 relationship insights with title, description (30-40 words), and emoji icon.
+8. greenFlags: List 4-5 positive relationship indicators based on their communication (e.g., "Regular daily communication", "Mutual support and encouragement").
+9. redFlags: List 2-3 areas to improve or watch (constructive, not harsh. e.g., "Could explore deeper emotional topics", "Consider more quality time planning").
+10. user1Interest: Rate ${userNames[0]}'s interest level 0-100 based on message frequency, length, and enthusiasm.
+11. user2Interest: Rate ${userNames[1]}'s interest level 0-100 based on message frequency, length, and enthusiasm.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: `Analyze these chat logs:\n\n${chatData}` }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: responseSchema
+                }
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const result = await response.json();
+            const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!jsonText) throw new Error("Empty API response");
+            
+            return JSON.parse(jsonText);
+        };
+
+        const renderOverviewStats = (stats) => {
+            const sortedDates = stats.dates.sort((a, b) => a - b);
+            const daysTogether = sortedDates.length > 0 
+                ? Math.ceil((sortedDates[sortedDates.length - 1] - sortedDates[0]) / (1000 * 60 * 60 * 24))
+                : 0;
+            
+            document.getElementById('total-messages').textContent = stats.totalMessages.toLocaleString();
+            document.getElementById('days-together').textContent = daysTogether;
+            document.getElementById('avg-daily').textContent = daysTogether > 0 ? Math.round(stats.totalMessages / daysTogether) : 0;
+            document.getElementById('total-words').textContent = stats.totalWords.toLocaleString();
+        };
+
+        const renderEngagementMetrics = (stats, analysisData) => {
+            const userNames = Object.keys(stats.users);
+            
+            if (userNames.length >= 1) {
+                document.getElementById('user1-engagement-name').textContent = userNames[0];
+                const user1Interest = analysisData.user1Interest || 85;
+                const user1Response = Math.min(100, Math.round((stats.users[userNames[0]].messages / stats.totalMessages) * 200));
+                
+                document.getElementById('user1-interest').textContent = `${user1Interest}%`;
+                document.getElementById('user1-response').textContent = `${user1Response}%`;
+                
+                setTimeout(() => {
+                    document.getElementById('user1-interest-bar').style.width = `${user1Interest}%`;
+                    document.getElementById('user1-response-bar').style.width = `${user1Response}%`;
+                }, 100);
+            }
+            
+            if (userNames.length >= 2) {
+                document.getElementById('user2-engagement-name').textContent = userNames[1];
+                const user2Interest = analysisData.user2Interest || 85;
+                const user2Response = Math.min(100, Math.round((stats.users[userNames[1]].messages / stats.totalMessages) * 200));
+                
+                document.getElementById('user2-interest').textContent = `${user2Interest}%`;
+                document.getElementById('user2-response').textContent = `${user2Response}%`;
+                
+                setTimeout(() => {
+                    document.getElementById('user2-interest-bar').style.width = `${user2Interest}%`;
+                    document.getElementById('user2-response-bar').style.width = `${user2Response}%`;
+                }, 100);
+            }
+        };
+
+        const renderUserStats = (stats, analysisData) => {
+            const userNames = Object.keys(stats.users);
+            
+            if (userNames.length >= 1) {
+                const user1 = stats.users[userNames[0]];
+                document.getElementById('user1-name').textContent = userNames[0];
+                document.getElementById('user1-messages').textContent = user1.messages.toLocaleString();
+                document.getElementById('user1-words').textContent = user1.words.toLocaleString();
+                document.getElementById('user1-avg').textContent = Math.round(user1.words / user1.messages);
+                document.getElementById('user1-style').textContent = analysisData.user1Style;
+                
+                const user1TopicsContainer = document.getElementById('user1-topics');
+                user1TopicsContainer.innerHTML = '';
+                analysisData.user1Topics.forEach(topic => {
+                    const tag = document.createElement('span');
+                    tag.className = 'bg-pink-200 text-pink-800 px-3 py-1 rounded-full text-sm font-medium';
+                    tag.textContent = topic;
+                    user1TopicsContainer.appendChild(tag);
+                });
+            }
+            
+            if (userNames.length >= 2) {
+                const user2 = stats.users[userNames[1]];
+                document.getElementById('user2-name').textContent = userNames[1];
+                document.getElementById('user2-messages').textContent = user2.messages.toLocaleString();
+                document.getElementById('user2-words').textContent = user2.words.toLocaleString();
+                document.getElementById('user2-avg').textContent = Math.round(user2.words / user2.messages);
+                document.getElementById('user2-style').textContent = analysisData.user2Style;
+                
+                const user2TopicsContainer = document.getElementById('user2-topics');
+                user2TopicsContainer.innerHTML = '';
+                analysisData.user2Topics.forEach(topic => {
+                    const tag = document.createElement('span');
+                    tag.className = 'bg-purple-200 text-purple-800 px-3 py-1 rounded-full text-sm font-medium';
+                    tag.textContent = topic;
+                    user2TopicsContainer.appendChild(tag);
+                });
+            }
+        };
+
+        const renderFlags = (analysisData) => {
+            const greenFlagsList = document.getElementById('green-flags-list');
+            greenFlagsList.innerHTML = '';
+            analysisData.greenFlags.forEach(flag => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start text-gray-700';
+                li.innerHTML = `<span class="text-green-500 mr-2 mt-1">✓</span><span>${flag}</span>`;
+                greenFlagsList.appendChild(li);
+            });
+
+            const redFlagsList = document.getElementById('red-flags-list');
+            redFlagsList.innerHTML = '';
+            analysisData.redFlags.forEach(flag => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start text-gray-700';
+                li.innerHTML = `<span class="text-orange-500 mr-2 mt-1">!</span><span>${flag}</span>`;
+                redFlagsList.appendChild(li);
+            });
+        };
+
+        const renderChart = (topicData) => {
+            const ctx = document.getElementById('topic-pie-chart').getContext('2d');
+            if (myChart) myChart.destroy();
+
+            const colors = ['#f687b3', '#9f7aea', '#63b3ed', '#f6e05e', '#48bb78', '#fc8181', '#ed8936', '#f6ad55'];
+
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: topicData.map(t => t.name),
+                    datasets: [{
+                        data: topicData.map(t => t.percentage),
+                        backgroundColor: colors.slice(0, topicData.length),
+                        borderColor: '#ffffff',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Inter', size: 14, weight: '600' },
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.label}: ${ctx.parsed}%`
+                            },
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: { size: 16 },
+                            bodyFont: { size: 14 },
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    }
+                }
+            });
+        };
+
+        const renderTimeline = (stats) => {
+            const ctx = document.getElementById('timeline-chart').getContext('2d');
+            if (timelineChart) timelineChart.destroy();
+
+            const messagesByDate = {};
+            stats.dates.forEach(date => {
+                const dateStr = date.toISOString().split('T')[0];
+                messagesByDate[dateStr] = (messagesByDate[dateStr] || 0) + 1;
+            });
+
+            const sortedDates = Object.keys(messagesByDate).sort();
+            const last30Days = sortedDates.slice(-30);
+
+            timelineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last30Days.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                    datasets: [{
+                        label: 'Messages per Day',
+                        data: last30Days.map(d => messagesByDate[d]),
+                        borderColor: '#9f7aea',
+                        backgroundColor: 'rgba(159, 122, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#9f7aea',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        };
+
+        const renderInsights = (insights) => {
+            const container = document.getElementById('insights-container');
+            container.innerHTML = '';
+            
+            insights.forEach((insight, i) => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 rounded-2xl shadow-lg fade-in-up';
+                card.style.animationDelay = `${1.9 + i * 0.1}s`;
+                card.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="text-4xl mr-4">${insight.icon}</div>
+                        <div>
+                            <h4 class="text-xl font-bold text-gray-800 mb-2">${insight.title}</h4>
+                            <p class="text-gray-600">${insight.description}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        const renderSuggestions = (suggestions) => {
+            suggestionsList.innerHTML = '';
+            suggestions.forEach((suggestion, i) => {
+                const li = document.createElement('li');
+                li.classList.add('bg-gradient-to-r', 'from-purple-50', 'to-pink-50', 'p-6', 'rounded-2xl', 'shadow-lg', 'flex', 'items-start', 'fade-in-up');
+                li.style.animationDelay = `${2.1 + i * 0.1}s`;
+                li.innerHTML = `<span class="text-pink-500 text-3xl mr-4 mt-1">★</span><p class="text-gray-700 text-lg">${suggestion}</p>`;
+                suggestionsList.appendChild(li);
+            });
+        };
+
+        const handleAnalysis = async () => {
+            if (chatFiles.length === 0) {
+                errorMessage.textContent = "Please select JSON files first!";
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
+            analyzeButton.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            dashboardResults.classList.add('hidden');
+            
+            try {
+                const stats = calculateStats();
+                const chatData = formatChatData();
+                if (!chatData.trim()) throw new Error("No valid messages found");
+
+                const analysisData = await callGeminiApi(chatData, stats);
+                
+                renderOverviewStats(stats);
+                renderEngagementMetrics(stats, analysisData);
+                renderUserStats(stats, analysisData);
+                renderFlags(analysisData);
+                renderChart(analysisData.topics);
+                renderTimeline(stats);
+                renderInsights(analysisData.insights);
+                renderSuggestions(analysisData.suggestions);
+                dashboardResults.classList.remove('hidden');
+
+            } catch (e) {
+                console.error("Analysis failed:", e);
+                errorMessage.textContent = `Analysis failed: ${e.message}`;
+                errorMessage.classList.remove('hidden');
+                analyzeButton.classList.remove('hidden');
+            } finally {
+                loadingSpinner.classList.add('hidden');
+            }
+        };
+
+        analyzeButton.addEventListener('click', handleAnalysis);
+    </script>
+</body>
+</html>
