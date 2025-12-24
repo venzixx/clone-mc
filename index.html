@@ -1,325 +1,596 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy 4 Months! - Our Online Adventure</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, updateDoc, onSnapshot, disableNetwork } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        setLogLevel('silent');
-        
-        window.Firebase = {
-            initializeApp, getAuth, signInAnonymously, signInWithCustomToken, 
-            getFirestore, doc, setDoc, updateDoc, onSnapshot, disableNetwork
-        };
-    </script>
+<meta charset="UTF-8">
+<title>Merry Christmas ❤️</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .fade-in-up {
-            animation: fadeInUp 1.5s ease-out forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: transparent;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 1000;
-            transform: translate3d(0, 0, 0);
-        }
-        .interaction-pulse {
-            animation: pulse-grow 0.5s ease-out;
-        }
-        @keyframes pulse-grow {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.15); opacity: 0.9; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .blended-button {
-            transition: all 0.15s;
-            background-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-        .blended-button:hover {
-            background-color: rgba(245, 245, 255, 0.9);
-        }
-        .text-shadow-glow {
-            transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
-            color: #4a5568;
-        }
-        .text-shadow-glow:hover {
-            text-shadow: 0 0 8px rgba(255, 105, 180, 0.6);
-            color: #e879f9;
-        }
-        .burst-emoji {
-            position: absolute;
-            font-size: 2rem;
-            opacity: 0;
-            pointer-events: none;
-            animation: burst 1s ease-out forwards;
-            z-index: 2000;
-        }
-        @keyframes burst {
-            0% { transform: scale(0.5) translateY(0); opacity: 1; }
-            50% { transform: scale(1.5) translateY(-50px); opacity: 1; }
-            100% { transform: scale(2) translateY(-100px); opacity: 0; }
-        }
-    </style>
+<style>
+/* --- 1. MAIN PAGE STYLES --- */
+body {
+  margin: 0;
+  height: 100vh;
+  background: radial-gradient(circle at top, #0b1d3a, #020111 70%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Courier New', monospace;
+  color: white;
+  overflow: hidden;
+}
+
+/* Stars */
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: twinkle 2s infinite alternate;
+}
+@keyframes twinkle {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+/* Snow */
+.snow {
+  position: absolute;
+  top: -10px;
+  animation: fall linear infinite;
+  pointer-events: none;
+}
+@keyframes fall {
+  to { transform: translateY(110vh); }
+}
+
+/* Hearts */
+.heart {
+  position: absolute;
+  bottom: -20px;
+  animation: rise 6s linear infinite;
+}
+@keyframes rise {
+  to { transform: translateY(-120vh); opacity: 0; }
+}
+
+.container {
+  text-align: center;
+  width: 90%;
+  max-width: 520px;
+  z-index: 10;
+}
+
+.hidden { display: none !important; }
+
+/* Titles */
+.title {
+  font-size: 32px;
+  text-shadow: 0 0 15px rgba(255,255,255,0.6);
+  margin-bottom: 15px;
+}
+.subtitle {
+  font-size: 14px;
+  opacity: 0.85;
+  margin-bottom: 20px;
+}
+
+/* Tree */
+.tree {
+  font-size: 120px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s;
+}
+.tree:active { transform: scale(0.95); }
+
+.light {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  animation: glow 1.5s infinite alternate;
+}
+@keyframes glow {
+  from { box-shadow: 0 0 5px currentColor; }
+  to { box-shadow: 0 0 15px currentColor; }
+}
+
+.counter {
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+/* Gift */
+.gift {
+  font-size: 90px;
+  cursor: pointer;
+  animation: float 3s ease-in-out infinite;
+  transition: transform 0.3s;
+}
+.gift:hover { transform: scale(1.1); }
+@keyframes float {
+  50% { transform: translateY(-20px); }
+}
+
+/* --- MESSAGE BOX STYLES --- */
+.box {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 30px 25px;
+  border-radius: 15px;
+  white-space: pre-line;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-height: 100px;
+  font-size: 19px; 
+  line-height: 1.7; 
+}
+
+/* Cursor Blink Animation */
+.typing {
+  border-right: 3px solid white;
+  animation: blink 0.8s infinite;
+}
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+/* Buttons */
+.btn {
+  margin-top: 25px;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: white;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+  font-family: inherit;
+  font-size: 17px;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 255, 255, 0.2);
+}
+
+.btn-row {
+  position: relative;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Z-INDEX LAYERING FIX */
+#yesBtn {
+  z-index: 2; 
+  background: rgba(255, 20, 147, 0.3);
+  border-color: rgba(255, 105, 180, 0.8);
+  position: relative;
+}
+
+#noBtn {
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ddd;
+  transition: transform 0.1s ease-out;
+  position: relative; 
+}
+
+/* Confetti */
+#confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* --- 2. CUSTOM ALERT MODAL STYLES --- */
+.custom-alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 80px;
+  z-index: 10000;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.custom-alert-overlay.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+.custom-alert-box {
+  background-color: #1b1613;
+  width: 420px;
+  max-width: 90%;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  border: 1px solid #2d2620;
+  transform: scale(0.95);
+  transition: transform 0.2s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: left;
+}
+
+.custom-alert-overlay.active .custom-alert-box {
+  transform: scale(1);
+}
+
+.alert-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffdcb0;
+  margin-bottom: 8px;
+}
+
+.alert-message {
+  font-size: 14px;
+  color: #ffffff;
+  margin-bottom: 24px;
+  line-height: 1.4;
+}
+
+.alert-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-btn {
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+.btn-ok {
+  background-color: #ffcc80;
+  color: #2d1b15;
+  border: 2px solid #2d1b15;
+  box-shadow: 0 0 0 2px #ffcc80; 
+  margin-right: 2px;
+}
+.btn-ok:active { background-color: #ffb74d; }
+
+.btn-cancel {
+  background-color: #4e342e;
+  color: #ffcc80;
+}
+.btn-cancel:hover { background-color: #5d4037; }
+
+</style>
 </head>
+
 <body>
-    <div id="app" class="w-full max-w-lg mx-4 p-8 bg-white shadow-2xl rounded-3xl transition-all duration-700">
-        <div id="locked-screen" class="flex flex-col items-center justify-center text-center">
-            <svg class="w-16 h-16 text-pink-500 mb-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-4a2 2 0 00-2-2H6a2 2 0 00-2 2v4a2 2 0 002 2zm0-6h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v4a2 2 0 002 2z"></path>
-            </svg>
-            <h1 class="text-3xl font-extrabold text-gray-800 mb-6">Enter Your Secret Code</h1>
-            <p class="text-gray-600 mb-8">This special message is just for you.</p>
-            <input type="password" id="unlock-code-input" placeholder="********" maxlength="8" class="w-full p-3 mb-4 text-center text-2xl tracking-widest border-2 border-pink-300 rounded-xl focus:border-pink-500 focus:ring-pink-500 transition duration-300 outline-none">
-            <button id="unlock-button" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-300 transform hover:scale-[1.02] active:scale-[0.98]">Unlock Message</button>
-            <p id="error-message" class="text-red-500 mt-4 opacity-0 transition-opacity duration-300">Incorrect code. Try again, sweetheart!</p>
-        </div>
 
-        <div id="unlocked-screen" class="hidden flex flex-col items-center justify-center text-center">
-            <h2 class="text-4xl md:text-5xl font-extrabold text-pink-600 mb-6 fade-in-up" style="animation-delay: 0.1s;">Happy 4 Months!</h2>
-            <p class="text-xl md:text-2xl text-purple-700 mb-8 fade-in-up" style="animation-delay: 0.5s;">To my amazing partner,</p>
-            <div id="main-message" class="space-y-6 text-gray-700 text-lg md:text-xl leading-relaxed max-w-sm fade-in-up text-shadow-glow hover:text-pink-500" style="animation-delay: 1s;">
-                <p>Four months of late-night calls, endless pings, and connecting across all the miles. Every time I see your name pop up, the distance shrinks to nothing.</p>
-                <p>You're the best notification I get all day. Thank you for making this long-distance journey the best adventure, <span class="font-bold">even if it's only online for now.</span></p>
-                <p class="text-2xl font-semibold text-pink-500">I love you more than words can type.</p>
-            </div>
+<audio id="music" src="music.mp3" loop></audio>
+<audio id="whisper" src="whisper.mp3"></audio>
 
-            <div id="interaction-buttons" class="flex flex-wrap justify-center gap-4 mt-10 fade-in-up" style="animation-delay: 1.8s;">
-                <button data-type="hugs" data-emoji="🫂" class="blended-button p-4 rounded-xl transition duration-150 transform active:scale-95 flex flex-col items-center justify-center min-w-[120px] hover:bg-purple-50">
-                    <span class="text-3xl text-pink-500">🫂</span>
-                    <span class="text-sm font-semibold mt-1 text-gray-600">Send Hug</span>
-                    <span id="hug-count" class="text-xs font-bold mt-1 text-purple-500">0</span>
-                </button>
-                <button data-type="hearts" data-emoji="💖" class="blended-button p-4 rounded-xl transition duration-150 transform active:scale-95 flex flex-col items-center justify-center min-w-[120px] hover:bg-red-50">
-                    <span class="text-3xl text-pink-500">❤️</span>
-                    <span class="text-sm font-semibold mt-1 text-gray-600">Send Heart</span>
-                    <span id="heart-count" class="text-xs font-bold mt-1 text-red-500">0</span>
-                </button>
-                <button data-type="kisses" data-emoji="😘" class="blended-button p-4 rounded-xl transition duration-150 transform active:scale-95 flex flex-col items-center justify-center min-w-[120px] hover:bg-pink-50">
-                    <span class="text-3xl text-pink-500">💋</span>
-                    <span class="text-sm font-semibold mt-1 text-gray-600">Send Kiss</span>
-                    <span id="kiss-count" class="text-xs font-bold mt-1 text-pink-500">0</span>
-                </button>
-            </div>
+<div class="container">
 
-            <button id="reset-counters-button" class="mt-6 text-sm text-gray-500 hover:text-red-500 transition duration-150 underline fade-in-up" style="animation-delay: 2.0s;">Reset Counters (for fun!)</button>
-            <p class="text-purple-500 mt-8 text-lg fade-in-up" style="animation-delay: 2.2s;">Forever yours,<br>Venlin</p>
-            <button id="next-page-button" onclick="window.location.href = 'page2.html';" class="mt-6 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center fade-in-up" style="animation-delay: 2.4s;">Continue the Surprise →</button>
-        </div>
+  <div id="titleScreen">
+    <div class="title">🎄 Merry Christmas 🎄</div>
+    <div class="subtitle">Light the tree, then open your gift ✨</div>
+    <div class="tree" id="tree">🎄</div>
+    <div class="counter" id="count">Lights added: 0</div>
+    <div class="gift" id="gift">🎁</div>
+  </div>
+
+  <div id="page1" class="hidden">
+    <div class="title">💌 A Christmas Note</div>
+    <div id="msg1" class="box typing"></div>
+    <button id="skip1" class="btn" style="margin-top: 10px;">Skip ⏭️</button>
+    <button id="next1" class="btn hidden">Next ❤️</button>
+  </div>
+
+  <div id="pageLDR" class="hidden">
+    <div class="title">🌏 Miles Apart</div>
+    <div id="msgLDR" class="box typing"></div>
+    <button id="skipLDR" class="btn" style="margin-top: 10px;">Skip ⏭️</button>
+    <button id="nextLDR" class="btn hidden">Next 💖</button>
+  </div>
+
+  <div id="pageFinal" class="hidden">
+    <div class="title">💍 One Last Thing...</div>
+    <div id="msgFinal" class="box typing"></div>
+    
+    <button id="skipFinal" class="btn" style="margin-top: 10px;">Skip ⏭️</button>
+
+    <div id="finalButtons" class="btn-row hidden">
+      <button id="yesBtn" class="btn">Yes 💖</button>
+      <button id="noBtn" class="btn">No 🙅‍♀️</button>
     </div>
+    <canvas id="confetti"></canvas>
+  </div>
 
-    <script type="module">
-        const { initializeApp, getAuth, signInWithCustomToken, signInAnonymously, getFirestore, doc, setDoc, updateDoc, onSnapshot, disableNetwork } = window.Firebase;
+</div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const CORRECT_CODE = "19091307";
-            const lockedScreen = document.getElementById('locked-screen');
-            const unlockedScreen = document.getElementById('unlocked-screen');
-            const codeInput = document.getElementById('unlock-code-input');
-            const unlockButton = document.getElementById('unlock-button');
-            const errorMessage = document.getElementById('error-message');
-            const resetButton = document.getElementById('reset-counters-button');
-            const hugCountSpan = document.getElementById('hug-count');
-            const heartCountSpan = document.getElementById('heart-count');
-            const kissCountSpan = document.getElementById('kiss-count');
-            const COLORS = ['#FFC0CB', '#FF69B4', '#DA70D6', '#9370DB', '#DDA0DD'];
-            
-            let db, countersRef, useLocalStorage = false;
-            const initialCounters = { hugs: 0, hearts: 0, kisses: 0 };
-            let localCounters = {...initialCounters};
+<div id="customAlert" class="custom-alert-overlay">
+  <div class="custom-alert-box">
+    <div class="alert-title">This page says</div>
+    <div class="alert-message" id="modalText">REALLY? YOU'RE SKIPPING THE MESSAGE? FINE! 😤</div>
+    <div class="alert-buttons">
+      <button class="modal-btn btn-ok" id="modalOk">OK</button>
+      <button class="modal-btn btn-cancel" id="modalCancel">Cancel</button>
+    </div>
+  </div>
+</div>
 
-            const initFirebase = async () => {
-                useLocalStorage = true;
-                loadLocalCounters();
-                try {
-                    const app = initializeApp({
-                        apiKey: "AIzaSyBxSEzcFY3upg-ABn_S_YdYFP7zTvNterM",
-                        authDomain: "venlin-826c5.firebaseapp.com",
-                        projectId: "venlin-826c5",
-                        storageBucket: "venlin-826c5.firebasestorage.app",
-                        messagingSenderId: "867276134485",
-                        appId: "1:867276134485:web:560797e0fd58506293dcdc"
-                    });
-                    const auth = getAuth(app);
-                    db = getFirestore(app);
-                    const authPromise = (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) ? signInWithCustomToken(auth, __initial_auth_token) : signInAnonymously(auth);
-                    await Promise.race([authPromise, new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))]);
-                    countersRef = doc(db, 'artifacts', 'venlin-826c5', 'public', 'data', 'anniversary_counters', 'main');
-                    setupRealtimeCounterListener();
-                    useLocalStorage = false;
-                    console.log("✓ Firebase connected");
-                } catch (e) {
-                    if (db) try { await disableNetwork(db); } catch (ex) {}
-                    console.log("✓ Running in local mode");
-                }
-            };
+<script>
+/* --- 1. SETUP: STARS, SNOW, HEARTS --- */
+for (let i = 0; i < 80; i++) {
+  const s = document.createElement("div"); s.className = "star"; s.style.left = Math.random()*100+"vw"; s.style.top = Math.random()*100+"vh"; document.body.appendChild(s);
+}
+setInterval(() => {
+  const s = document.createElement("div"); s.className = "snow"; s.innerHTML = "❄"; s.style.left = Math.random()*100+"vw"; s.style.fontSize = Math.random()*10+10+"px"; s.style.animationDuration = Math.random()*3+2+"s"; document.body.appendChild(s); setTimeout(()=>s.remove(),5000);
+},120);
+setInterval(() => {
+  const h = document.createElement("div"); h.className = "heart"; h.innerHTML = "❤️"; h.style.left = Math.random()*100+"vw"; document.body.appendChild(h); setTimeout(()=>h.remove(),6000);
+},900);
 
-            const loadLocalCounters = () => {
-                hugCountSpan.textContent = localCounters.hugs;
-                heartCountSpan.textContent = localCounters.hearts;
-                kissCountSpan.textContent = localCounters.kisses;
-            };
+/* Tree lights */
+let lights = 0; const tree = document.getElementById("tree"); const counter = document.getElementById("count");
+tree.onclick = (e) => {
+  const rect = tree.getBoundingClientRect(); const l = document.createElement("div"); l.className = "light"; l.style.left = (e.clientX - rect.left - 5) + "px"; l.style.top = (e.clientY - rect.top - 5) + "px"; l.style.background = ["red","yellow","cyan","pink"][Math.floor(Math.random()*4)]; tree.appendChild(l); counter.innerText = `Lights added: ${++lights}`;
+};
 
-            const setupRealtimeCounterListener = () => {
-                onSnapshot(countersRef, (docSnapshot) => {
-                    if (docSnapshot.exists()) {
-                        const data = docSnapshot.data();
-                        hugCountSpan.textContent = data.hugs || 0;
-                        heartCountSpan.textContent = data.hearts || 0;
-                        kissCountSpan.textContent = data.kisses || 0;
-                        localCounters = { ...data };
-                    } else {
-                        setDoc(countersRef, initialCounters).catch(() => { useLocalStorage = true; });
-                    }
-                }, () => {
-                    useLocalStorage = true;
-                    loadLocalCounters();
-                    if (db) disableNetwork(db).catch(() => {});
-                });
-            };
+/* --- 2. CONTENT DATA --- */
 
-            const updateCounter = async (type) => {
-                if (useLocalStorage) {
-                    localCounters[type]++;
-                    if (type === 'hugs') hugCountSpan.textContent = localCounters.hugs;
-                    else if (type === 'hearts') heartCountSpan.textContent = localCounters.hearts;
-                    else kissCountSpan.textContent = localCounters.kisses;
-                    return;
-                }
-                if (!db || !countersRef) return;
-                const counterUpdate = {};
-                let currentValue = parseInt((type === 'hugs' ? hugCountSpan : type === 'hearts' ? heartCountSpan : kissCountSpan).textContent) || 0;
-                counterUpdate[type] = currentValue + 1;
-                try {
-                    await updateDoc(countersRef, counterUpdate);
-                } catch (e) {
-                    await setDoc(countersRef, initialCounters);
-                    await updateDoc(countersRef, counterUpdate);
-                }
-            };
+const content = [
+  {
+    // Page 1 Data
+    text: `Merry Christmas, my love ❤️
 
-            const resetCounters = async () => {
-                if (useLocalStorage) {
-                    localCounters = {...initialCounters};
-                    loadLocalCounters();
-                    return;
-                }
-                if (!db || !countersRef) return;
-                try { await setDoc(countersRef, initialCounters); } catch (e) {}
-            };
+If I could send my heart directly to you tonight, it would find its way across the distance in seconds.
 
-            let synths = {};
-            const initAudio = async () => {
-                try {
-                    if (Tone.context.state !== 'running') await Tone.start();
-                    synths.hug = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sine" }, envelope: { attack: 0.2, decay: 0.3, sustain: 0.5, release: 1.5 }, volume: -12 }).toDestination();
-                    synths.heart = new Tone.PluckSynth({ dampening: 8000, resonance: 0.8, volume: -10 }).toDestination();
-                    synths.kiss = new Tone.Synth({ oscillator: { type: "triangle" }, envelope: { attack: 0.05, decay: 0.15, sustain: 0, release: 0.3 }, volume: -18 }).toDestination();
-                } catch (e) {}
-            };
+Thank you for being my warmth, my calm, and my safe space, even from afar.✨`,
+    elementId: 'msg1',
+    nextBtnId: 'next1',
+    skipBtnId: 'skip1',
+    prompt: "REALLY? YOU'RE SKIPPING THE MESSAGE? FINE! 😤"
+  },
+  {
+    // Page 2 (LDR) Data
+    text: `Even though miles separate us right now, you are always in my thoughts.
 
-            const playInteractionSound = async (type) => {
-                if (!synths.hug) await initAudio();
-                if (type === 'hugs' && synths.hug) synths.hug.triggerAttackRelease(["C4", "E4", "G4"], "1s");
-                else if (type === 'hearts' && synths.heart) synths.heart.triggerAttackRelease("A4", "0.5s");
-                else if (type === 'kisses' && synths.kiss) synths.kiss.triggerAttackRelease("G5", "0.1s");
-            };
+Every morning text, every late-night call, and just hearing your voice makes the distance feel a little smaller.
 
-            const showEmojiBurst = (button, emoji) => {
-                const rect = button.getBoundingClientRect();
-                const el = document.createElement('span');
-                el.classList.add('burst-emoji');
-                el.textContent = emoji;
-                el.style.left = `${rect.left + Math.random() * (rect.width - 32)}px`;
-                el.style.top = `${rect.top + Math.random() * (rect.height - 32)}px`;
-                document.body.appendChild(el);
-                setTimeout(() => el.remove(), 1000);
-            };
+I dream of the day I can finally hold you close instead of just holding my phone. But until then, you are worth every second of waiting. ❤️`,
+    elementId: 'msgLDR',
+    nextBtnId: 'nextLDR',
+    skipBtnId: 'skipLDR',
+    prompt: "Wow. You can't wait 10 seconds? I poured my heart out! 😒"
+  },
+  {
+    // Page 3 (Final) Data
+    text: `Will you be my forever?`,
+    elementId: 'msgFinal',
+    nextBtnId: 'finalButtons', // This reveals the Yes/No row
+    skipBtnId: 'skipFinal',
+    prompt: "SERIOUSLY? It's the big question! Don't rush this! 😫"
+  }
+];
 
-            const confetti = () => {
-                for (let i = 0; i < 100; i++) {
-                    const c = document.createElement('div');
-                    c.classList.add('confetti');
-                    const x = Math.random() * window.innerWidth;
-                    c.style.left = `${x}px`;
-                    c.style.top = '-10px';
-                    c.style.backgroundColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-                    c.style.width = c.style.height = `${Math.random() * 8 + 5}px`;
-                    document.body.appendChild(c);
-                    const duration = Math.random() * 2.5 + 1.5;
-                    const finalX = x + (Math.random() - 0.5) * 500;
-                    c.animate([
-                        { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
-                        { transform: `translate(${finalX - x}px, ${window.innerHeight + 10}px) rotate(${Math.random() * 360}deg)`, opacity: 0.5 }
-                    ], { duration: duration * 1000, easing: 'ease-in', fill: 'forwards' });
-                    setTimeout(() => c.remove(), duration * 1000);
-                }
-            };
+/* --- 3. TYPING & FLOW ENGINE --- */
 
-            const handleUnlock = () => {
-                if (codeInput.value === CORRECT_CODE) {
-                    lockedScreen.classList.add('hidden');
-                    unlockedScreen.classList.remove('hidden');
-                    confetti();
-                    const interval = setInterval(confetti, 500);
-                    setTimeout(() => clearInterval(interval), 3000);
-                } else {
-                    errorMessage.classList.remove('opacity-0');
-                    codeInput.value = '';
-                    setTimeout(() => errorMessage.classList.add('opacity-0'), 2000);
-                }
-            };
+let step = 0; // 0 = Page 1, 1 = Page LDR, 2 = Final
+let charIndex = 0;
+let isTyping = false;
+let typingTimeout;
 
-            unlockButton.addEventListener('click', handleUnlock);
-            codeInput.addEventListener('keypress', (e) => {
-                if (e.key < '0' || e.key > '9') e.preventDefault();
-                if (e.key === 'Enter') handleUnlock();
-            });
-            if (resetButton) resetButton.addEventListener('click', resetCounters);
-            document.querySelectorAll('#interaction-buttons button').forEach(button => {
-                button.addEventListener('click', async () => {
-                    const type = button.dataset.type;
-                    await playInteractionSound(type);
-                    updateCounter(type);
-                    showEmojiBurst(button, button.dataset.emoji);
-                    button.classList.add('interaction-pulse');
-                    setTimeout(() => button.classList.remove('interaction-pulse'), 500);
-                });
-            });
+const whisper = document.getElementById("whisper");
+const music = document.getElementById("music");
+const customAlert = document.getElementById("customAlert");
+const modalText = document.getElementById("modalText");
+const modalOk = document.getElementById("modalOk");
+const modalCancel = document.getElementById("modalCancel");
 
-            codeInput.focus();
-            initFirebase();
-        });
-    </script>
+function startStep(index) {
+  step = index;
+  charIndex = 0;
+  isTyping = true;
+  
+  // Hide current Next button (if any)
+  const currentData = content[step];
+  document.getElementById(currentData.nextBtnId).classList.add("hidden");
+  document.getElementById(currentData.skipBtnId).classList.remove("hidden");
+  
+  // Clear box
+  const box = document.getElementById(currentData.elementId);
+  box.innerHTML = "";
+  box.classList.add("typing");
+  
+  typeLoop();
+}
+
+function typeLoop() {
+  const data = content[step];
+  const box = document.getElementById(data.elementId);
+  
+  if (charIndex < data.text.length) {
+    whisper.currentTime = 0; 
+    whisper.play();
+    box.innerHTML += data.text.charAt(charIndex++);
+    typingTimeout = setTimeout(typeLoop, 45); // Typing speed
+  } else {
+    finishTyping();
+  }
+}
+
+function finishTyping() {
+  clearTimeout(typingTimeout);
+  isTyping = false;
+  whisper.pause();
+  
+  const data = content[step];
+  const box = document.getElementById(data.elementId);
+  
+  // Fill full text instantly
+  box.innerHTML = data.text;
+  box.classList.remove("typing");
+  
+  // Hide Skip, Show Next
+  document.getElementById(data.skipBtnId).classList.add("hidden");
+  document.getElementById(data.nextBtnId).classList.remove("hidden");
+}
+
+/* --- 4. SKIP BUTTON LOGIC --- */
+// We attach listeners dynamically or just logic based on 'step'
+function handleSkip() {
+  if (isTyping) {
+    // Show modal with the specific prompt for this step
+    modalText.innerText = content[step].prompt;
+    customAlert.classList.add("active");
+  }
+}
+
+// Attach skip click handlers
+document.getElementById('skip1').onclick = handleSkip;
+document.getElementById('skipLDR').onclick = handleSkip;
+document.getElementById('skipFinal').onclick = handleSkip;
+
+// Modal Actions
+modalOk.onclick = () => {
+  customAlert.classList.remove("active");
+  finishTyping(); // Complete the current step instantly
+};
+
+modalCancel.onclick = () => {
+  customAlert.classList.remove("active");
+  // Resume typing (nothing changes, timeout is still running)
+};
+
+/* --- 5. PAGE NAVIGATION EVENTS --- */
+
+// Start
+document.getElementById("gift").onclick = () => {
+  music.play();
+  document.getElementById("titleScreen").classList.add("hidden");
+  document.getElementById("page1").classList.remove("hidden");
+  startStep(0);
+};
+
+// Page 1 -> Page LDR
+document.getElementById("next1").onclick = () => {
+  document.getElementById("page1").classList.add("hidden");
+  document.getElementById("pageLDR").classList.remove("hidden");
+  startStep(1);
+};
+
+// Page LDR -> Page Final
+document.getElementById("nextLDR").onclick = () => {
+  document.getElementById("pageLDR").classList.add("hidden");
+  document.getElementById("pageFinal").classList.remove("hidden");
+  startStep(2);
+};
+
+/* --- 6. YES/NO BUTTON LOGIC --- */
+const yesBtn = document.getElementById("yesBtn");
+const noBtn = document.getElementById("noBtn");
+const msgFinal = document.getElementById("msgFinal"); // We reuse the typing box for updates
+let scale = 1; 
+let noClicked = false; 
+let noAttempts = 0;
+
+const noMessages = [
+  "Are you sure about that? 🤨", 
+  "Really? Think again! 😤", 
+  "Come on, don't be mean! 😠", 
+  "Stop playing hard to get! 😡", 
+  "You're breaking my heart! 💔", 
+  "Just say YES already! 😭"
+];
+
+function moveNo() {
+  if (!noClicked) {
+    noClicked = true;
+    // Update the final message box briefly to complain
+    msgFinal.innerText = noMessages[Math.min(noAttempts, noMessages.length - 1)];
+    msgFinal.style.color = "#ff6b6b"; 
+    noAttempts++;
+    
+    // Wide Jump
+    const rangeX = window.innerWidth * 0.35; 
+    const rangeY = window.innerHeight * 0.35;
+    const randomX = Math.random() * rangeX * 2 - rangeX; 
+    const randomY = Math.random() * rangeY * 2 - rangeY;
+    
+    noBtn.style.position = 'absolute';
+    noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+    
+    // Grow Yes Button
+    scale += 0.2; 
+    yesBtn.style.transform = `scale(${scale})`;
+    
+    setTimeout(() => { noClicked = false; }, 200);
+  }
+}
+
+noBtn.addEventListener("mouseover", moveNo); 
+noBtn.addEventListener("touchstart", (e) => { e.preventDefault(); moveNo(); }); 
+noBtn.addEventListener("click", (e) => { e.preventDefault(); moveNo(); });
+
+yesBtn.addEventListener("mouseover", () => { 
+  scale += 0.05; 
+  yesBtn.style.transform = `scale(${scale})`; 
+});
+
+yesBtn.onclick = () => {
+  // Final Success State
+  document.getElementById("pageFinal").innerHTML = `
+    <div class="title">💖 Forever & Always</div>
+    <div class="box" style="border-color:#ff4d6d; background: rgba(255,77,109,0.2)">
+      You already are my forever. No distance can change that. 💍✨<br><br>I love you.
+    </div>
+  `;
+  launchConfetti();
+};
+
+/* Confetti */
+function launchConfetti() {
+  const canvas = document.getElementById("confetti"); 
+  const ctx = canvas.getContext("2d"); 
+  canvas.width = innerWidth; 
+  canvas.height = innerHeight;
+  
+  const pieces = []; 
+  const colors = ["#ff4d6d","#ffd166","#06d6a0","#4cc9f0","#f72585"];
+  
+  for (let i = 0; i < 150; i++) { 
+    pieces.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height - canvas.height, size: Math.random()*6+4, speed: Math.random()*3+2, color: colors[Math.floor(Math.random()*colors.length)] }); 
+  }
+  
+  function draw() { 
+    ctx.clearRect(0,0,canvas.width,canvas.height); 
+    pieces.forEach(p => { 
+      p.y += p.speed; 
+      ctx.fillStyle = p.color; 
+      ctx.fillRect(p.x,p.y,p.size,p.size); 
+    }); 
+    requestAnimationFrame(draw); 
+  }
+  draw();
+}
+</script>
 </body>
 </html>
